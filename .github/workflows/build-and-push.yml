@@ -55,7 +55,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=amd64
           cache-to: type=gha,mode=max,scope=amd64
@@ -99,7 +100,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=arm64
           cache-to: type=gha,mode=max,scope=arm64
@@ -108,6 +110,7 @@ jobs:
   create-manifest:
     runs-on: ubuntu-latest
     needs: [build-amd64, build-arm64]
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
@@ -132,16 +135,13 @@ jobs:
 
       - name: Create and push multi-arch manifest
         run: |
-          # Extract tags from metadata
-          TAGS="${{ steps.meta.outputs.tags }}"
+          # Get the base image name
+          BASE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
 
-          # Create and push manifest for each tag
-          while IFS= read -r tag; do
-            if [ -n "$tag" ]; then
-              echo "Creating manifest for: $tag"
-              docker manifest create "$tag" \
-                "${tag}-amd64" \
-                "${tag}-arm64"
-              docker manifest push "$tag"
-            fi
-          done <<< "$TAGS"
+          # Create latest mainfest           
+            echo "Creating manifest for latest tag"
+            docker manifest create "${BASE_IMAGE}:latest" \
+              --amend "${BASE_IMAGE}:latest-amd64" \
+              --amend "${BASE_IMAGE}:latest-arm64"
+            docker manifest push "${BASE_IMAGE}:latest"
+          fi
