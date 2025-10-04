@@ -135,13 +135,20 @@ jobs:
 
       - name: Create and push multi-arch manifest
         run: |
-          # Get the base image name
+          # Get the base image name and digests
           BASE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          AMD64_DIGEST="${{ needs.build-amd64.outputs.image-digest }}"
+          ARM64_DIGEST="${{ needs.build-arm64.outputs.image-digest }}"
 
-          # Create latest mainfest           
-            echo "Creating manifest for latest tag"
-            docker manifest create "${BASE_IMAGE}:latest" \
-              --amend "${BASE_IMAGE}:latest-amd64" \
-              --amend "${BASE_IMAGE}:latest-arm64"
-            docker manifest push "${BASE_IMAGE}:latest"
-          fi
+          # Remove existing manifest if it exists
+          docker manifest rm "${BASE_IMAGE}:latest" || true
+
+          # Create latest manifest using digests
+          echo "Creating manifest for latest tag"
+          echo "AMD64 digest: ${AMD64_DIGEST}"
+          echo "ARM64 digest: ${ARM64_DIGEST}"
+
+          docker manifest create "${BASE_IMAGE}:latest" \
+            --amend "${BASE_IMAGE}@${AMD64_DIGEST}" \
+            --amend "${BASE_IMAGE}@${ARM64_DIGEST}"
+          docker manifest push "${BASE_IMAGE}:latest"
