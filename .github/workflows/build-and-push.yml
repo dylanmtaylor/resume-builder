@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -61,7 +61,7 @@ jobs:
           platforms: linux/amd64
 
   build-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
       packages: write
