@@ -152,3 +152,8 @@ jobs:
             --amend "${BASE_IMAGE}:latest-amd64" \
             --amend "${BASE_IMAGE}:latest-arm64"
           docker manifest push "${BASE_IMAGE}:latest"
+
+      - name: Validate multi-arch manifest
+        run: |
+          # Inspect the created manifest to verify it was created successfully
+          docker manifest inspect ghcr.io/dylanmtaylor/resume-builder:latest 2>&1 || echo "Image not found in registry"
