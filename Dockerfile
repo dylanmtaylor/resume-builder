@@ -20,9 +20,18 @@ RUN apt-get update -qq && \
     curl \
     ca-certificates \
     python3-pip \
-    python3-venv && \
+    python3-venv \
+    jq \
+    unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install AWS CLI v2
+RUN ARCH=$(uname -m) && \
+    curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}.zip" -o /tmp/awscliv2.zip && \
+    unzip -q /tmp/awscliv2.zip -d /tmp && \
+    /tmp/aws/install && \
+    rm -rf /tmp/aws /tmp/awscliv2.zip
 
 # Create virtual environment and install OCI CLI for pushing to object storage
 RUN python3 -m venv /opt/venv && \
