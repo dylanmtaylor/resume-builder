@@ -1,4 +1,4 @@
-FROM dhi.io/debian:13
+FROM dhi.io/debian-base:trixie
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
