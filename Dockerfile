@@ -32,7 +32,7 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/aws /tmp/awscliv2.zip
 
 # Create non-root user and working directory
-RUN useradd -m -u 1000 builder && \
+RUN adduser --disabled-password --gecos "" --uid 1000 builder && \
     mkdir -p /tmp/resume /tmp/output && \
     chown -R builder:builder /tmp/resume /tmp/output
 
