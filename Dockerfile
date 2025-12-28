@@ -13,9 +13,8 @@ RUN echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/99-no-recommen
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     texlive-xetex \
+    texlive-latex-base \
     texlive-fonts-recommended \
-    texlive-fonts-extra \
-    texlive-font-utils \
     git \
     curl \
     ca-certificates \
