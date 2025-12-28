@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM dhi.io/debian:13
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -19,8 +19,6 @@ RUN apt-get update -qq && \
     git \
     curl \
     ca-certificates \
-    python3-pip \
-    python3-venv \
     jq \
     unzip && \
     apt-get clean && \
@@ -33,12 +31,13 @@ RUN ARCH=$(uname -m) && \
     /tmp/aws/install && \
     rm -rf /tmp/aws /tmp/awscliv2.zip
 
-# Create virtual environment and install OCI CLI for pushing to object storage
-RUN python3 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --no-cache-dir oci-cli
+# Create non-root user and working directory
+RUN useradd -m -u 1000 builder && \
+    mkdir -p /tmp/resume /tmp/output && \
+    chown -R builder:builder /tmp/resume /tmp/output
 
-# Add venv to PATH
-ENV PATH="/opt/venv/bin:$PATH"
+USER builder
+WORKDIR /home/builder
 
 # Default command
 CMD ["/bin/bash"]
