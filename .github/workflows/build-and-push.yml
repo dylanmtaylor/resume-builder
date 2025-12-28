@@ -41,6 +41,12 @@ jobs:
           username: dylanmtaylor
           password: ${{ secrets.DOCKERHUB_PAT }}
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: dylanmtaylor
+          password: ${{ secrets.DOCKERHUB_PAT }}
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
@@ -66,6 +72,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-amd64
+            docker.io/dylanmtaylor/resume-builder:latest-amd64
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=amd64
           cache-to: type=gha,mode=max,scope=amd64
@@ -95,6 +102,12 @@ jobs:
           username: dylanmtaylor
           password: ${{ secrets.DOCKERHUB_PAT }}
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: dylanmtaylor
+          password: ${{ secrets.DOCKERHUB_PAT }}
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
@@ -120,6 +133,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-arm64
+            docker.io/dylanmtaylor/resume-builder:latest-arm64
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=arm64
           cache-to: type=gha,mode=max,scope=arm64
@@ -143,6 +157,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: dylanmtaylor
+          password: ${{ secrets.DOCKERHUB_PAT }}
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -155,19 +175,22 @@ jobs:
 
       - name: Create and push multi-arch manifest
         run: |
-          # Get the base image name
           BASE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          DOCKER_IMAGE="docker.io/dylanmtaylor/resume-builder"
 
-          # Remove existing manifest if it exists
+          # GHCR manifest
           docker manifest rm "${BASE_IMAGE}:latest" || true
-
-          # Create latest manifest using tags
-          echo "Creating manifest for latest tag"
-
           docker manifest create "${BASE_IMAGE}:latest" \
             --amend "${BASE_IMAGE}:latest-amd64" \
             --amend "${BASE_IMAGE}:latest-arm64"
           docker manifest push "${BASE_IMAGE}:latest"
+
+          # Docker Hub manifest
+          docker manifest rm "${DOCKER_IMAGE}:latest" || true
+          docker manifest create "${DOCKER_IMAGE}:latest" \
+            --amend "${DOCKER_IMAGE}:latest-amd64" \
+            --amend "${DOCKER_IMAGE}:latest-arm64"
+          docker manifest push "${DOCKER_IMAGE}:latest"
 
       - name: Validate multi-arch manifest
         run: |
