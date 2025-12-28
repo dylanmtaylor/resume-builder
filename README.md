@@ -5,5 +5,5 @@ A Docker container with LaTeX and XeLaTeX set up for compiling my resumes. This 
 ## What's in it
 
 - XeLaTeX with font packages (texlive-xetex, fonts-recommended, fonts-extra)
-- Python 3 with OCI CLI for uploading to Oracle cloud storage
+- AWS command line interface v2 for uploading to Cloudflare R2 
 - Git and other basic tools
