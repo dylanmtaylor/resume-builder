@@ -33,6 +33,8 @@ FROM dhi.io/debian-base:trixie
 
 COPY --from=build /usr /usr
 COPY --from=build /etc/texmf /etc/texmf
+COPY --from=build /etc/fonts /etc/fonts
+COPY --from=build /etc/paperspecs /etc/paperspecs
 COPY --from=build /usr/local/aws-cli /usr/local/aws-cli
 COPY --from=build /usr/local/bin/aws /usr/local/bin/aws
 COPY --from=build --chown=65532:65532 /home/nonroot /home/nonroot
