@@ -1,15 +1,12 @@
-FROM dhi.io/debian-base:trixie
+FROM dhi.io/debian-base:trixie-dev AS build
 
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Speed up apt with parallel downloads and no recommendations
 RUN echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/99-no-recommends && \
     echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf.d/99-no-recommends && \
     echo 'Acquire::Languages "none";' >> /etc/apt/apt.conf.d/99-no-translation && \
     echo 'Acquire::Queue-Mode "host";' >> /etc/apt/apt.conf.d/99-parallel
 
-# Install dependencies
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     texlive-xetex \
@@ -23,21 +20,26 @@ RUN apt-get update -qq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install AWS CLI v2
 RUN ARCH=$(uname -m) && \
     curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}.zip" -o /tmp/awscliv2.zip && \
     unzip -q /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/aws /tmp/awscliv2.zip
 
-# Create non-root user and working directory
-RUN echo "builder:x:1000:1000::/home/builder:/bin/bash" >> /etc/passwd && \
-    echo "builder:x:1000:" >> /etc/group && \
-    mkdir -p /home/builder /tmp/resume /tmp/output && \
-    chown -R 1000:1000 /home/builder /tmp/resume /tmp/output
+RUN mkdir -p /home/nonroot /tmp/resume /tmp/output && \
+    chown -R 65532:65532 /home/nonroot /tmp/resume /tmp/output
 
-USER builder
-WORKDIR /home/builder
+FROM dhi.io/debian-base:trixie
 
-# Default command
+COPY --from=build /usr /usr
+COPY --from=build /etc/texmf /etc/texmf
+COPY --from=build /usr/local/aws-cli /usr/local/aws-cli
+COPY --from=build /usr/local/bin/aws /usr/local/bin/aws
+COPY --from=build --chown=65532:65532 /home/nonroot /home/nonroot
+COPY --from=build --chown=65532:65532 /tmp/resume /tmp/resume
+COPY --from=build --chown=65532:65532 /tmp/output /tmp/output
+COPY --from=build /var/lib/texmf /var/lib/texmf
+
+WORKDIR /home/nonroot
+
 CMD ["/bin/bash"]
