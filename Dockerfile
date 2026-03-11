@@ -27,7 +27,7 @@ RUN ARCH=$(uname -m) && \
     rm -rf /tmp/aws /tmp/awscliv2.zip
 
 RUN mkdir -p /home/nonroot /tmp/resume /tmp/output && \
-    chown -R 65532:65532 /home/nonroot /tmp/resume /tmp/output
+    chown -R 1000:1000 /home/nonroot /tmp/resume /tmp/output
 
 FROM dhi.io/debian-base:trixie
 
@@ -37,9 +37,9 @@ COPY --from=build /etc/fonts /etc/fonts
 COPY --from=build /etc/paperspecs /etc/paperspecs
 COPY --from=build /usr/local/aws-cli /usr/local/aws-cli
 COPY --from=build /usr/local/bin/aws /usr/local/bin/aws
-COPY --from=build --chown=65532:65532 /home/nonroot /home/nonroot
-COPY --from=build --chown=65532:65532 /tmp/resume /tmp/resume
-COPY --from=build --chown=65532:65532 /tmp/output /tmp/output
+COPY --from=build --chown=1000:1000 /home/nonroot /home/nonroot
+COPY --from=build --chown=1000:1000 /tmp/resume /tmp/resume
+COPY --from=build --chown=1000:1000 /tmp/output /tmp/output
 COPY --from=build /var/lib/texmf /var/lib/texmf
 
 WORKDIR /home/nonroot
